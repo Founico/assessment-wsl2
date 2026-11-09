@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Assessment WSL2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : une scène de module (type Storyline) centrée, annotée au-dessus, écrans qui se remplacent */
+:root{
+  --page:#eef1f2; --stage:#ffffff; --ink:#173f49; --muted:#5b7279;
+  --pink:#d9336f; --pink-ink:#ffffff; --pink-soft:#fbe5ee;
+  --teal:#1d5c6b; --line:#d5dee0; --code-bg:#13262c; --code-fg:#cfe7ea;
+  --ok:#1f7a4d; --ok-soft:#e1f3e9; --ko:#b3261e; --ko-soft:#fbe4e2; --warn:#a15c00; --warn-soft:#fdf0dc;
+  --f-ui:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --f-code:"JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#0f1a1d; --stage:#16262b; --ink:#e3eef0; --muted:#9bb2b8;
+  --pink:#e8558a; --pink-ink:#ffffff; --pink-soft:#3a1b27;
+  --teal:#7cc3cf; --line:#2b4047; --code-bg:#0a1417; --code-fg:#cfe7ea;
+  --ok:#5fcf93; --ok-soft:#163327; --ko:#f08a82; --ko-soft:#3a1b19; --warn:#f0b35c; --warn-soft:#3a2a12;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --page:#0f1a1d; --stage:#16262b; --ink:#e3eef0; --muted:#9bb2b8;
+  --pink:#e8558a; --pink-ink:#ffffff; --pink-soft:#3a1b27;
+  --teal:#7cc3cf; --line:#2b4047; --code-bg:#0a1417; --code-fg:#cfe7ea;
+  --ok:#5fcf93; --ok-soft:#163327; --ko:#f08a82; --ko-soft:#3a1b19; --warn:#f0b35c; --warn-soft:#3a2a12;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 40px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.note{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline}
+.note b{color:var(--ink);font-weight:700;letter-spacing:.02em}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:6px;min-height:600px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+.bar .ttl{font-weight:600;font-size:14px}
+.screen{flex:1;padding:26px 28px 28px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(28px,5vw,42px);font-weight:800;color:var(--ink)}
+h1 span{color:var(--pink)}
+h2{font-size:20px;font-weight:700}
+p{margin:0}
+.lead{max-width:60ch;color:var(--muted);font-size:16px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tile{border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.tile strong{font-size:18px;color:var(--pink)}
+.tile p{color:var(--muted);font-size:14px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:11px 22px;cursor:pointer;background:var(--pink);color:var(--pink-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal);padding:9px 20px}
+.btn:focus-visible,.opt:focus-within,.axis-btn:focus-visible,.play:focus-visible,.x:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.qhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.qnum{background:var(--pink);color:var(--pink-ink);font-weight:700;padding:4px 12px;border-radius:4px}
+.theme{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+.qtext{display:flex;flex-direction:column;gap:12px;min-width:0;max-width:720px}
+.qfoot{display:flex;flex-direction:column;gap:12px;align-items:flex-end;margin-top:auto;max-width:720px;width:100%}
+.fb{align-self:stretch;border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.fb.ok{background:var(--ok-soft);color:var(--ink);border-left:4px solid var(--ok)}
+.fb.ko{background:var(--ko-soft);color:var(--ink);border-left:4px solid var(--ko)}
+.fb .verdict{font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.fb.ok .verdict{color:var(--ok)} .fb.ko .verdict{color:var(--ko)}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font-family:var(--f-code);font-size:12.5px;padding:12px 14px;border-radius:5px;white-space:pre-wrap;overflow-wrap:anywhere}
+pre .pr{color:#7fd3a4}
+.inst{color:var(--pink);font-weight:600;font-size:14px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:6px;padding:11px 14px;cursor:pointer}
+.opt input{accent-color:var(--pink);width:18px;height:18px;margin:2px 0 0;flex:none}
+.opt.sel{border-color:var(--pink);background:var(--pink-soft)}
+.opt.good{border-color:var(--ok);background:var(--ok-soft)}
+.opt.bad{border-color:var(--ko);background:var(--ko-soft)}
+.opt.locked{cursor:default}
+.side{display:flex;flex-direction:column;gap:14px}
+.analysis{background:var(--pink);color:var(--pink-ink);border-radius:18px 18px 18px 4px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.analysis h3{font-size:17px}
+.analysis .verdict{font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.analysis .btn{background:var(--pink-ink);color:var(--pink);align-self:flex-end}
+.placeholder{border:1.5px dashed var(--line);border-radius:18px;padding:22px;color:var(--muted);font-size:13px;text-align:center}
+.res{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:center}
+.score{display:flex;align-items:baseline;gap:8px}
+.score b{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+.score span{color:var(--muted);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.ko{background:var(--ko-soft);color:var(--ko)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.radar{position:relative;width:100%;max-width:400px;aspect-ratio:1;margin:0 auto}
+.radar svg{width:100%;height:100%;display:block}
+.axis-btn{position:absolute;transform:translate(-50%,-50%);font:inherit;font-size:12.5px;font-weight:700;background:var(--pink);color:var(--pink-ink);border:0;border-radius:999px;padding:5px 11px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.axis-btn small{font-weight:600;opacity:.85;font-variant-numeric:tabular-nums}
+.hint{font-size:13px;color:var(--muted)}
+.modal{position:absolute;inset:0;background:color-mix(in srgb,var(--stage) 55%,transparent);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:18px;overflow-y:auto}
+.card{margin:auto;background:var(--pink);color:var(--pink-ink);border-radius:8px;width:min(540px,100%);padding:20px 22px;display:flex;flex-direction:column;gap:14px;position:relative}
+.card .x{position:absolute;top:10px;right:12px;background:transparent;border:0;color:var(--pink-ink);font-size:26px;line-height:1;cursor:pointer;padding:4px 8px}
+.card h2{font-size:22px;padding-right:36px}
+.badges{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ring{border:2px solid #ffd84d;border-radius:999px;padding:3px 10px;font-weight:800;font-variant-numeric:tabular-nums}
+.lvl{background:#ffd84d;color:#6b3a00;font-weight:800;padding:4px 12px;border-radius:3px;font-size:13px}
+.video{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:6px;overflow:hidden;background:#0d2228;display:flex;align-items:center;justify-content:center}
+.video .frame{position:absolute;inset:0;background:
+  radial-gradient(circle at 78% 30%, rgba(217,51,111,.35), transparent 45%),
+  linear-gradient(160deg,#173f49,#0d2228)}
+.video .term{position:absolute;left:7%;top:14%;width:52%;background:rgba(0,0,0,.45);border-radius:6px;padding:10px 12px;font-family:var(--f-code);font-size:11px;color:#9fe3bd;line-height:1.6}
+.video .term i{display:block;height:7px;border-radius:3px;background:rgba(207,231,234,.25);margin-top:6px}
+.play{position:relative;width:64px;height:64px;border-radius:50%;border:0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.play::before{content:"";border-left:20px solid var(--pink);border-top:12px solid transparent;border-bottom:12px solid transparent;margin-left:5px}
+.vmeta{position:absolute;left:0;right:0;bottom:0;padding:8px 12px;font-size:12px;color:#d7e6e9;background:linear-gradient(transparent,rgba(0,0,0,.6));display:flex;justify-content:space-between;gap:8px}
+.vmsg{position:absolute;inset:auto 12px 40px;background:rgba(0,0,0,.7);color:#fff;font-size:13px;padding:8px 10px;border-radius:4px;text-align:center}
+.keep{font-size:14px;background:rgba(255,255,255,.14);border-radius:5px;padding:10px 12px}
+.keep b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.toast{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--stage);font-size:13px;padding:10px 16px;border-radius:6px;max-width:calc(100% - 32px);text-align:center}
+.legend{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+@media (max-width:720px){
+  .cols,.qgrid,.res{grid-template-columns:1fr}
+  .screen{padding:20px 18px}
+  .axis-btn{font-size:11px;padding:4px 8px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .screen{animation:in .25s ease-out}
+  @keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="note"><b>Maquette RFTO</b><span>Template assessment adapté à la sensibilisation WSL2. Deux questions jouables, questions 3 à 15 simulées. Contenus à valider par DevExp.</span></div>
+
+  <div class="stage" id="stage">
+    <div class="bar"><span class="brand">Coorpacademy</span><span class="ttl" id="barTitle">Sensibilisation WSL2</span></div>
+    <div id="view"></div>
+  </div>
+
+  <p class="legend">Seuil de réussite simulé : 13/15. Niveaux par thème : 0-1 à revoir, 2 OK, 3 validé. Scores simulés pour les thèmes 3 à 5 : 3, 2 et 3 ; thèmes 1 et 2 : 2 points simulés plus votre réponse.</p>
+</div>
+
+<script>
+const AXES=[
+ {id:"inst",short:"Installer",title:"Installer des logiciels",
+  keep:"Installez uniquement les logiciels nécessaires à votre activité, depuis une source vérifiée.",
+  vid:"Vidéo · 1 min · issue du chapitre 1, mesures élémentaires"},
+ {id:"prot",short:"Protections",title:"Garder les protections actives",
+  keep:"Ne désactivez jamais l'EDR et ne contournez pas les configurations Windows. Toute exception passe par l'équipe sécurité.",
+  vid:"Vidéo · 1 min · issue du chapitre 2, EDR et mises à jour"},
+ {id:"maj",short:"Mises à jour",title:"Mettre à jour",
+  keep:"Laissez le script de mise à jour s'exécuter au démarrage et maintenez à jour les logiciels qu'il ne couvre pas.",
+  vid:"Vidéo · 1 min · issue du chapitre 2, suivi des consignes SSI"},
+ {id:"expo",short:"Exposer et tracer",title:"Exposer et tracer",
+  keep:"N'exposez pas un service WSL2 plus d'une journée et ne masquez aucune trace de votre activité.",
+  vid:"Vidéo · 1 min · issue du chapitre 1, risques"},
+ {id:"charte",short:"Charte",title:"Charte et signalement",
+  keep:"Au moindre doute, contactez votre SSI local ou l'équipe DevExp, sans attendre d'avoir toutes les explications.",
+  vid:"Vidéo · 1 min · issue du chapitre 3"}
+];
+const Q=[
+ {axis:0,
+  html:`<p>Pour un script de traitement, un collègue vous conseille un outil de conversion. Le README du dépôt GitHub propose de l'installer avec :</p>
+<pre><span class="pr">$</span> curl -fsSL https://raw.githubusercontent.com/fileconv/fileconv/main/install.sh | sudo bash</pre>
+<p><strong>Que faites-vous ?</strong></p>`,
+  opts:[
+   {t:"Je lance la commande : le dépôt compte plusieurs milliers d'étoiles et mon collègue l'utilise déjà.",p:0,
+    fb:"La popularité d'un dépôt ne vérifie pas son contenu, et ce script s'exécute avec les droits administrateur sans que vous l'ayez lu."},
+   {t:"Je l'installe le temps du traitement, puis je le désinstalle.",p:0,
+    fb:"Un code malveillant agit dès la première exécution : le désinstaller ensuite ne répare rien."},
+   {t:"Je vérifie que l'outil est utile à mon activité, je lis le script et j'installe une version issue d'une source vérifiée.",p:1,
+    fb:"Usage professionnel et source vérifiée : ce sont les deux questions à se poser avant toute installation."}
+  ]},
+ {axis:1,
+  html:`<p>Depuis ce matin, votre build prend deux fois plus de temps. Vous constatez que l'EDR analyse chaque fichier généré. La livraison est prévue demain.</p>
+<pre><span class="pr">$</span> make build
+[████████░░░░░░░░░░░░] 41%  elapsed 00:18:42</pre>
+<p><strong>Que faites-vous ?</strong></p>`,
+  opts:[
+   {t:"Je suspends l'EDR le temps du build et je le réactive juste après.",p:0,
+    fb:"Même pour quelques minutes, une désactivation de l'EDR demande l'accord explicite de l'équipe sécurité."},
+   {t:"Je laisse l'EDR actif et je demande à l'équipe sécurité une exception justifiée.",p:1,
+    fb:"L'EDR reste actif et l'équipe sécurité décide d'une éventuelle exception : c'est la seule voie prévue."},
+   {t:"J'ajoute le dossier de build aux exclusions de l'antivirus Windows.",p:0,
+    fb:"Ajouter une exclusion revient à modifier une configuration de sécurité sans autorisation : la décision revient à l'équipe sécurité."}
+  ]}
+];
+const SIM=[2,2,3,2,3]; // points simulés (thèmes 1-2 : 2 questions simulées + la réponse jouée)
+let st={i:0,ans:[null,null],sel:null,validated:false};
+const view=document.getElementById('view'), stage=document.getElementById('stage');
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function intro(){
+  view.innerHTML=`<div class="screen">
+   <h1>Utiliser WSL2 <span>en sécurité</span></h1>
+   <p class="lead">Avant d'obtenir votre accès, vérifiez que vous connaissez les règles d'usage de WSL2 chez Safran. Pour chaque situation, une seule réponse respecte la charte.</p>
+   <div class="cols">
+     <div class="tile"><strong>15 situations</strong><p>Réparties sur 5 thèmes : installation, protections, mises à jour, exposition et traçabilité, charte et signalement.</p></div>
+     <div class="tile"><strong>Une restitution par thème</strong><p>À la fin, vous voyez votre score sur chaque thème et la règle à retenir. Réussite à partir de 13/15. Votre résultat est transmis à la plateforme.</p></div>
+   </div>
+   <div class="row"><button class="btn" id="go">Commencer</button></div>
+  </div>`;
+  document.getElementById('go').onclick=()=>{st={i:0,ans:[null,null],sel:null,validated:false};question()};
+}
+
+function question(){
+  const q=Q[st.i], ax=AXES[q.axis];
+  view.innerHTML=`<div class="screen">
+   <div class="qhead"><span class="qnum">Question ${st.i+1}/15</span><span class="theme">${ax.title}</span></div>
+   <div class="qtext">${q.html}
+    <p class="inst">Sélectionnez votre réponse, puis cliquez sur « Valider ».</p>
+    <div class="opts" role="radiogroup" aria-label="Réponses">
+     ${q.opts.map((o,k)=>`<label class="opt" id="o${k}"><input type="radio" name="q${st.i}" id="r${st.i}_${k}" value="${k}"><span>${esc(o.t)}</span></label>`).join('')}
+    </div>
+   </div>
+   <div class="qfoot" id="foot">
+    <button class="btn" id="val" disabled>Valider</button>
+   </div>
+  </div>`;
+  view.querySelectorAll('input[type=radio]').forEach(r=>r.onchange=()=>{
+    if(st.validated) return;
+    st.sel=+r.value;
+    view.querySelectorAll('.opt').forEach((l,k)=>l.classList.toggle('sel',k===st.sel));
+    document.getElementById('val').disabled=false;
+  });
+  document.getElementById('val').onclick=validate;
+}
+
+function validate(){
+  const q=Q[st.i], o=q.opts[st.sel]; st.validated=true; st.ans[st.i]=o.p;
+  view.querySelectorAll('.opt').forEach((l,k)=>{
+    l.classList.add('locked'); l.classList.remove('sel');
+    l.querySelector('input').disabled=true;
+    if(k===st.sel) l.classList.add(o.p?'good':'bad');
+    else if(q.opts[k].p) l.classList.add('good');
+  });
+  const last=st.i===Q.length-1;
+  document.getElementById('foot').innerHTML=`<div class="fb ${o.p?'ok':'ko'}" aria-live="polite">
+     <span class="verdict">${o.p?'Bonne réponse':'Réponse incorrecte'}</span>
+     <p>${esc(o.fb)}</p>
+   </div>
+   ${last?'<p class="hint">Dans la maquette, les questions 3 à 15 sont simulées.</p>':''}
+   <button class="btn" id="next">${last?'Voir mes résultats':'Question suivante'}</button>`;
+  document.getElementById('next').onclick=()=>{
+    if(last) results(); else {st.i++;st.sel=null;st.validated=false;question();}
+  };
+}
+
+function scores(){return SIM.map((s,k)=>k<2?s+(st.ans[k]||0):s)}
+function level(s){return s>=3?{t:"Validé",c:"ok"}:s===2?{t:"OK",c:"warn"}:{t:"À revoir",c:"ko"}}
+
+function results(){
+  const sc=scores(), total=sc.reduce((a,b)=>a+b,0), pass=total>=13;
+  const R=118,C=160,N=5;
+  const pt=(k,r)=>{const a=-Math.PI/2+k*2*Math.PI/N;return[C+r*Math.cos(a),C+r*Math.sin(a)]};
+  let rings='';
+  for(let l=1;l<=3;l++){rings+=`<polygon points="${[...Array(N)].map((_,k)=>pt(k,R*l/3).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1.2"/>`}
+  let spokes=[...Array(N)].map((_,k)=>{const[x,y]=pt(k,R);return`<line x1="${C}" y1="${C}" x2="${x}" y2="${y}" stroke="var(--line)" stroke-width="1.2"/>`}).join('');
+  const poly=sc.map((s,k)=>pt(k,R*s/3).join(',')).join(' ');
+  const dots=sc.map((s,k)=>{const[x,y]=pt(k,R*s/3);return`<circle cx="${x}" cy="${y}" r="4.5" fill="var(--pink)"/>`}).join('');
+  const ticks=[1,2,3].map(l=>{const[x,y]=pt(0,R*l/3);return`<text x="${x+6}" y="${y+4}" font-size="10" fill="var(--muted)" font-family="Figtree, sans-serif">${l}</text>`}).join('');
+  const btns=AXES.map((a,k)=>{const[x,y]=pt(k,R+30);return`<button class="axis-btn" data-k="${k}" style="left:${x/320*100}%;top:${y/320*100}%">${a.short}<small>${sc[k]}/3</small></button>`}).join('');
+  view.innerHTML=`<div class="screen">
+   <div class="res">
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <h2>Votre résultat</h2>
+      <div class="score"><b>${total}</b><span>/ 15</span></div>
+      <span class="pill ${pass?'ok':'ko'}" style="align-self:flex-start">${pass?'Sensibilisation validée':'Seuil non atteint (13/15)'}</span>
+      <p class="hint">${pass?'Votre réussite est transmise à la plateforme. Revoyez les thèmes où vous n\'avez pas 3/3.':'Revoyez les thèmes en rouge, puis répondez à nouveau aux 15 situations.'} Cliquez sur un thème pour voir sa vidéo.</p>
+      <div class="row">
+        <button class="btn" id="pdf">Télécharger le mémo WSL2 (PDF)</button>
+        <button class="btn ghost" id="again">Répondre à nouveau</button>
+      </div>
+    </div>
+    <div class="radar">
+      <svg viewBox="0 0 320 320" role="img" aria-label="Radar des scores par thème">${rings}${spokes}
+        <polygon points="${poly}" fill="color-mix(in srgb, var(--pink) 22%, transparent)" stroke="var(--pink)" stroke-width="2"/>${dots}${ticks}</svg>
+      ${btns}
+    </div>
+   </div>
+  </div>`;
+  view.querySelectorAll('.axis-btn').forEach(b=>b.onclick=()=>detail(+b.dataset.k));
+  document.getElementById('again').onclick=()=>{st={i:0,ans:[null,null],sel:null,validated:false};question()};
+  document.getElementById('pdf').onclick=()=>toast("Dans le module, ce bouton télécharge le mémo PDF de la charte WSL2.");
+}
+
+function detail(k){
+  const a=AXES[k], s=scores()[k], lv=level(s);
+  const m=document.createElement('div'); m.className='modal';
+  m.innerHTML=`<div class="card" role="dialog" aria-modal="true" aria-labelledby="dt">
+    <button class="x" aria-label="Fermer">×</button>
+    <h2 id="dt">${a.title}</h2>
+    <div class="badges"><span class="ring">${s}/3</span><span class="lvl">${lv.t}</span></div>
+    <div class="video">
+      <div class="frame"></div>
+      <div class="term">$ wsl --status<i style="width:80%"></i><i style="width:55%"></i><i style="width:68%"></i></div>
+      <button class="play" aria-label="Lire la vidéo"></button>
+      <div class="vmeta"><span>${a.vid}</span><span>00:00 / 01:00</span></div>
+    </div>
+    <div class="keep"><b>À retenir</b>${esc(a.keep)}</div>
+  </div>`;
+  stage.appendChild(m);
+  const close=()=>m.remove();
+  m.querySelector('.x').onclick=close; m.onclick=e=>{if(e.target===m)close()};
+  m.querySelector('.x').focus();
+  m.querySelector('.play').onclick=()=>{
+    if(m.querySelector('.vmsg'))return;
+    const d=document.createElement('div');d.className='vmsg';d.textContent='Emplacement de la vidéo motion design (environ 1 minute), montée à partir du script existant.';
+    m.querySelector('.video').appendChild(d);
+  };
+  document.addEventListener('keydown',function h(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',h)}});
+}
+
+function toast(t){
+  const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=t;
+  stage.appendChild(d);setTimeout(()=>d.remove(),3200);
+}
+intro();
+</script>
+</body>
+</html>
